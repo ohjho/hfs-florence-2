@@ -1,12 +1,17 @@
 import gradio as gr
 from transformers import AutoProcessor, AutoModelForCausalLM
-from PIL import Image
+
 import requests
 import copy
+
+from PIL import Image
+import io
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+
 import random
 import numpy as np
+
 import subprocess
 subprocess.run('pip install flash-attn --no-build-isolation', env={'FLASH_ATTENTION_SKIP_CUDA_BUILD': "TRUE"}, shell=True)
 
