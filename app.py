@@ -1,5 +1,6 @@
 import gradio as gr
 from transformers import AutoProcessor, AutoModelForCausalLM
+import spaces
 
 import requests
 import copy
