@@ -90,61 +90,63 @@ def draw_ocr_bboxes(image, prediction):
     return image
 
 def process_image(image, task_prompt, text_input=None):
-    image = Image.fromarray(image) 
+    image = Image.fromarray(image)  # Convert NumPy array to PIL Image
     if task_prompt == '<CAPTION>':
         result = run_example(task_prompt, image)
-        return result
+        return result, None
     elif task_prompt == '<DETAILED_CAPTION>':
         result = run_example(task_prompt, image)
-        return result
+        return result, None
     elif task_prompt == '<MORE_DETAILED_CAPTION>':
         result = run_example(task_prompt, image)
-        return result
+        return result, None
     elif task_prompt == '<OD>':
         results = run_example(task_prompt, image)
         fig = plot_bbox(image, results['<OD>'])
-        return fig
+        return "", fig
     elif task_prompt == '<DENSE_REGION_CAPTION>':
         results = run_example(task_prompt, image)
         fig = plot_bbox(image, results['<DENSE_REGION_CAPTION>'])
-        return fig
+        return "", fig
     elif task_prompt == '<REGION_PROPOSAL>':
         results = run_example(task_prompt, image)
         fig = plot_bbox(image, results['<REGION_PROPOSAL>'])
-        return fig
+        return "", fig
     elif task_prompt == '<CAPTION_TO_PHRASE_GROUNDING>':
         results = run_example(task_prompt, image, text_input)
         fig = plot_bbox(image, results['<CAPTION_TO_PHRASE_GROUNDING>'])
-        return fig
+        return "", fig
     elif task_prompt == '<REFERRING_EXPRESSION_SEGMENTATION>':
         results = run_example(task_prompt, image, text_input)
         output_image = copy.deepcopy(image)
         output_image = draw_polygons(output_image, results['<REFERRING_EXPRESSION_SEGMENTATION>'], fill_mask=True)
-        return output_image
+        return "", output_image
     elif task_prompt == '<REGION_TO_SEGMENTATION>':
         results = run_example(task_prompt, image, text_input)
         output_image = copy.deepcopy(image)
         output_image = draw_polygons(output_image, results['<REGION_TO_SEGMENTATION>'], fill_mask=True)
-        return output_image
+        return "", output_image
     elif task_prompt == '<OPEN_VOCABULARY_DETECTION>':
         results = run_example(task_prompt, image, text_input)
         bbox_results = convert_to_od_format(results['<OPEN_VOCABULARY_DETECTION>'])
         fig = plot_bbox(image, bbox_results)
-        return fig
+        return "", fig
     elif task_prompt == '<REGION_TO_CATEGORY>':
         results = run_example(task_prompt, image, text_input)
-        return results
+        return results, None
     elif task_prompt == '<REGION_TO_DESCRIPTION>':
         results = run_example(task_prompt, image, text_input)
-        return results
+        return results, None
     elif task_prompt == '<OCR>':
         result = run_example(task_prompt, image)
-        return result
+        return result, None
     elif task_prompt == '<OCR_WITH_REGION>':
         results = run_example(task_prompt, image)
         output_image = copy.deepcopy(image)
         output_image = draw_ocr_bboxes(output_image, results['<OCR_WITH_REGION>'])
-        return output_image
+        return "", output_image
+    else:
+        return "", None  # Return empty string and None for unknown task prompts
 
 css = """
   #output {
