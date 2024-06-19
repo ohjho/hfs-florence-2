@@ -4,7 +4,7 @@ from transformers import AutoProcessor, AutoModelForCausalLM
 import requests
 import copy
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont 
 import io
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
