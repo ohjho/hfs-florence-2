@@ -90,6 +90,7 @@ def draw_ocr_bboxes(image, prediction):
     return image
 
 def process_image(image, task_prompt, text_input=None):
+    image = Image.fromarray(image) 
     if task_prompt == '<CAPTION>':
         result = run_example(task_prompt, image)
         return result
