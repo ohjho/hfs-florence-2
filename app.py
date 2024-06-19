@@ -176,7 +176,7 @@ with gr.Blocks(css=css) as demo:
             examples=[
                 ["image1.jpg", '<CAPTION>'],
                 ["image1.jpg", '<OD>'],
-                ["image1.jpg", '<OCR_WITH_REGION>']
+                ["image2.jpg", '<OCR_WITH_REGION>']
             ],
             inputs=[input_img, task_prompt],
             outputs=[output_text, output_img],
