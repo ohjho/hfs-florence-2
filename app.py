@@ -211,8 +211,8 @@ with gr.Blocks(css=css) as demo:
 
         gr.Examples(
             examples=[
-                ["image1.jpg", 'Caption'],
-                ["image2.jpg", 'Detailed Caption']
+                ["image1.jpg", 'Object Detection'],
+                ["image2.jpg", 'OCR with Region']
             ],
             inputs=[input_img, task_prompt],
             outputs=[output_text, output_img],
