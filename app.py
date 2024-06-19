@@ -1,3 +1,48 @@
+Hugging Face's logo
+Hugging Face
+Search models, datasets, users...
+Models
+Datasets
+Spaces
+Posts
+Docs
+Solutions
+Pricing
+
+
+
+Spaces:
+
+gokaygokay
+/
+Florence-2
+
+
+like
+0
+
+Logs
+App
+Files
+Community
+Settings
+Florence-2
+/
+app.py
+
+gokaygokay's picture
+gokaygokay
+Update app.py
+ca16909
+VERIFIED
+12 minutes ago
+raw
+history
+blame
+edit
+delete
+No virus
+8.31 kB
 import gradio as gr
 from transformers import AutoProcessor, AutoModelForCausalLM
 import spaces
@@ -111,56 +156,70 @@ def draw_ocr_bboxes(image, prediction):
 
 def process_image(image, task_prompt, text_input=None):
     image = Image.fromarray(image)  # Convert NumPy array to PIL Image
-    if task_prompt == '<CAPTION>':
+    if task_prompt == 'Caption':
+        task_prompt = '<CAPTION>'
         result = run_example(task_prompt, image)
         return result, None
-    elif task_prompt == '<DETAILED_CAPTION>':
+    elif task_prompt == 'Detailed Caption':
+        task_prompt = '<DETAILED_CAPTION>'
         result = run_example(task_prompt, image)
         return result, None
-    elif task_prompt == '<MORE_DETAILED_CAPTION>':
+    elif task_prompt == 'More Detailed Caption':
+        task_prompt = '<MORE_DETAILED_CAPTION>'
         result = run_example(task_prompt, image)
         return result, None
-    elif task_prompt == '<OD>':
+    elif task_prompt == 'Object Detection':
+        task_prompt = '<OD>'
         results = run_example(task_prompt, image)
         fig = plot_bbox(image, results['<OD>'])
         return results, fig_to_pil(fig)
-    elif task_prompt == '<DENSE_REGION_CAPTION>':
+    elif task_prompt == 'Dense Region Caption':
+        task_prompt = '<DENSE_REGION_CAPTION>'
         results = run_example(task_prompt, image)
         fig = plot_bbox(image, results['<DENSE_REGION_CAPTION>'])
         return results, fig_to_pil(fig)
-    elif task_prompt == '<REGION_PROPOSAL>':
+    elif task_prompt == 'Region Proposal':
+        task_prompt = '<REGION_PROPOSAL>'
         results = run_example(task_prompt, image)
         fig = plot_bbox(image, results['<REGION_PROPOSAL>'])
         return results, fig_to_pil(fig)
-    elif task_prompt == '<CAPTION_TO_PHRASE_GROUNDING>':
+    elif task_prompt == 'Caption to Phrase Grounding':
+        task_prompt = '<CAPTION_TO_PHRASE_GROUNDING>'
         results = run_example(task_prompt, image, text_input)
         fig = plot_bbox(image, results['<CAPTION_TO_PHRASE_GROUNDING>'])
         return results, fig_to_pil(fig)
-    elif task_prompt == '<REFERRING_EXPRESSION_SEGMENTATION>':
+    elif task_prompt == 'Referring Expression Segmentation':
+        task_prompt = '<REFERRING_EXPRESSION_SEGMENTATION>'
         results = run_example(task_prompt, image, text_input)
         output_image = copy.deepcopy(image)
         output_image = draw_polygons(output_image, results['<REFERRING_EXPRESSION_SEGMENTATION>'], fill_mask=True)
         return results, output_image
-    elif task_prompt == '<REGION_TO_SEGMENTATION>':
+    elif task_prompt == 'Region to Segmentation':
+        task_prompt = '<REGION_TO_SEGMENTATION>'
         results = run_example(task_prompt, image, text_input)
         output_image = copy.deepcopy(image)
         output_image = draw_polygons(output_image, results['<REGION_TO_SEGMENTATION>'], fill_mask=True)
         return results, output_image
-    elif task_prompt == '<OPEN_VOCABULARY_DETECTION>':
+    elif task_prompt == 'Open Vocabulary Detection':
+        task_prompt = '<OPEN_VOCABULARY_DETECTION>'
         results = run_example(task_prompt, image, text_input)
         bbox_results = convert_to_od_format(results['<OPEN_VOCABULARY_DETECTION>'])
         fig = plot_bbox(image, bbox_results)
         return results, fig_to_pil(fig)
-    elif task_prompt == '<REGION_TO_CATEGORY>':
+    elif task_prompt == 'Region to Category':
+        task_prompt = '<REGION_TO_CATEGORY>'
         results = run_example(task_prompt, image, text_input)
         return results, None
-    elif task_prompt == '<REGION_TO_DESCRIPTION>':
+    elif task_prompt == 'Region to Description':
+        task_prompt = '<REGION_TO_DESCRIPTION>'
         results = run_example(task_prompt, image, text_input)
         return results, None
-    elif task_prompt == '<OCR>':
+    elif task_prompt == 'OCR':
+        task_prompt = '<OCR>'
         result = run_example(task_prompt, image)
         return result, None
-    elif task_prompt == '<OCR_WITH_REGION>':
+    elif task_prompt == 'OCR with Region':
+        task_prompt = '<OCR_WITH_REGION>'
         results = run_example(task_prompt, image)
         output_image = copy.deepcopy(image)
         output_image = draw_ocr_bboxes(output_image, results['<OCR_WITH_REGION>'])
@@ -183,11 +242,11 @@ with gr.Blocks(css=css) as demo:
             with gr.Column():
                 input_img = gr.Image(label="Input Picture")
                 task_prompt = gr.Dropdown(choices=[
-                    '<CAPTION>', '<DETAILED_CAPTION>', '<MORE_DETAILED_CAPTION>', '<OD>',
-                    '<DENSE_REGION_CAPTION>', '<REGION_PROPOSAL>', '<CAPTION_TO_PHRASE_GROUNDING>',
-                    '<REFERRING_EXPRESSION_SEGMENTATION>', '<REGION_TO_SEGMENTATION>',
-                    '<OPEN_VOCABULARY_DETECTION>', '<REGION_TO_CATEGORY>', '<REGION_TO_DESCRIPTION>',
-                    '<OCR>', '<OCR_WITH_REGION>'
+                    'Caption', 'Detailed Caption', 'More Detailed Caption', 'Object Detection',
+                    'Dense Region Caption', 'Region Proposal', 'Caption to Phrase Grounding',
+                    'Referring Expression Segmentation', 'Region to Segmentation',
+                    'Open Vocabulary Detection', 'Region to Category', 'Region to Description',
+                    'OCR', 'OCR with Region'
                 ], label="Task Prompt")
                 text_input = gr.Textbox(label="Text Input (optional)")
                 submit_btn = gr.Button(value="Submit")
@@ -197,8 +256,8 @@ with gr.Blocks(css=css) as demo:
 
         gr.Examples(
             examples=[
-                ["image1.jpg", '<OD>'],
-                ["image2.jpg", '<OCR_WITH_REGION>']
+                ["image1.jpg", 'Caption'],
+                ["image2.jpg", 'Detailed Caption']
             ],
             inputs=[input_img, task_prompt],
             outputs=[output_text, output_img],
