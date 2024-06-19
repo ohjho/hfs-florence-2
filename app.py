@@ -14,6 +14,12 @@ model_id = 'microsoft/Florence-2-large'
 model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True).eval()
 processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
 
+def fig_to_pil(fig):
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+    return Image.open(buf)
+    
 def run_example(task_prompt, image, text_input=None):
     if text_input is None:
         prompt = task_prompt
@@ -103,19 +109,19 @@ def process_image(image, task_prompt, text_input=None):
     elif task_prompt == '<OD>':
         results = run_example(task_prompt, image)
         fig = plot_bbox(image, results['<OD>'])
-        return "", fig
+        return "", fig_to_pil(fig)
     elif task_prompt == '<DENSE_REGION_CAPTION>':
         results = run_example(task_prompt, image)
         fig = plot_bbox(image, results['<DENSE_REGION_CAPTION>'])
-        return "", fig
+        return "", fig_to_pil(fig)
     elif task_prompt == '<REGION_PROPOSAL>':
         results = run_example(task_prompt, image)
         fig = plot_bbox(image, results['<REGION_PROPOSAL>'])
-        return "", fig
+        return "", fig_to_pil(fig)
     elif task_prompt == '<CAPTION_TO_PHRASE_GROUNDING>':
         results = run_example(task_prompt, image, text_input)
         fig = plot_bbox(image, results['<CAPTION_TO_PHRASE_GROUNDING>'])
-        return "", fig
+        return "", fig_to_pil(fig)
     elif task_prompt == '<REFERRING_EXPRESSION_SEGMENTATION>':
         results = run_example(task_prompt, image, text_input)
         output_image = copy.deepcopy(image)
@@ -130,7 +136,7 @@ def process_image(image, task_prompt, text_input=None):
         results = run_example(task_prompt, image, text_input)
         bbox_results = convert_to_od_format(results['<OPEN_VOCABULARY_DETECTION>'])
         fig = plot_bbox(image, bbox_results)
-        return "", fig
+        return "", fig_to_pil(fig)
     elif task_prompt == '<REGION_TO_CATEGORY>':
         results = run_example(task_prompt, image, text_input)
         return results, None
