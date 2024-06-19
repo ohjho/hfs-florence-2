@@ -21,6 +21,8 @@ model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True).t
 processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
 
 
+DESCRIPTION = "# [Florence-2 Demo](https://huggingface.co/microsoft/Florence-2-large)"
+
 colormap = ['blue','orange','green','purple','brown','pink','gray','olive','cyan','red',
             'lime','indigo','violet','aqua','magenta','coral','gold','tan','skyblue']
 
@@ -175,7 +177,7 @@ css = """
 """
 
 with gr.Blocks(css=css) as demo:
-    gr.HTML("<h1><center>Florence-2 Demo<center><h1>")
+    gr.Markdown(DESCRIPTION)
     with gr.Tab(label="Florence-2 Image Captioning"):
         with gr.Row():
             with gr.Column():
