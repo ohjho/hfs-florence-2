@@ -19,6 +19,10 @@ model_id = 'microsoft/Florence-2-large'
 model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True).eval()
 processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
 
+
+colormap = ['blue','orange','green','purple','brown','pink','gray','olive','cyan','red',
+            'lime','indigo','violet','aqua','magenta','coral','gold','tan','skyblue']
+
 def fig_to_pil(fig):
     buf = io.BytesIO()
     fig.savefig(buf, format='png')
@@ -59,8 +63,7 @@ def plot_bbox(image, data):
     return fig
 
 def draw_polygons(image, prediction, fill_mask=False):
-    colormap = ['blue','orange','green','purple','brown','pink','gray','olive','cyan','red',
-            'lime','indigo','violet','aqua','magenta','coral','gold','tan','skyblue']
+
     draw = ImageDraw.Draw(image)
     scale = 1
     for polygons, label in zip(prediction['polygons'], prediction['labels']):
