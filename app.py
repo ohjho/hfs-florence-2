@@ -195,7 +195,6 @@ with gr.Blocks(css=css) as demo:
 
         gr.Examples(
             examples=[
-                ["image1.jpg", '<CAPTION>'],
                 ["image1.jpg", '<OD>'],
                 ["image2.jpg", '<OCR_WITH_REGION>']
             ],
