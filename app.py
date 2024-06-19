@@ -202,7 +202,7 @@ with gr.Blocks(css=css) as demo:
                     'Referring Expression Segmentation', 'Region to Segmentation',
                     'Open Vocabulary Detection', 'Region to Category', 'Region to Description',
                     'OCR', 'OCR with Region'
-                ], label="Task Prompt")
+                ], label="Task Prompt", value= 'Caption')
                 text_input = gr.Textbox(label="Text Input (optional)")
                 submit_btn = gr.Button(value="Submit")
             with gr.Column():
