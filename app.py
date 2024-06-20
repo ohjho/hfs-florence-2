@@ -16,7 +16,7 @@ import numpy as np
 import subprocess
 subprocess.run('pip install flash-attn --no-build-isolation', env={'FLASH_ATTENTION_SKIP_CUDA_BUILD': "TRUE"}, shell=True)
 
-model_id = 'microsoft/Florence-2-large-ft'
+model_id = 'microsoft/Florence-2-large'
 model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True).to("cuda").eval()
 processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
 
