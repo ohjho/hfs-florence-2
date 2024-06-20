@@ -12,6 +12,7 @@ import matplotlib.patches as patches
 
 import random
 import numpy as np
+import cv2
 
 import subprocess
 subprocess.run('pip install flash-attn --no-build-isolation', env={'FLASH_ATTENTION_SKIP_CUDA_BUILD': "TRUE"}, shell=True)
@@ -21,7 +22,7 @@ model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True).t
 processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
 
 
-DESCRIPTION = "# [Florence-2 Demo](https://huggingface.co/microsoft/Florence-2-large)"
+DESCRIPTION = "# [Florence-2 Video Demo](https://huggingface.co/microsoft/Florence-2-large)"
 
 colormap = ['blue','orange','green','purple','brown','pink','gray','olive','cyan','red',
             'lime','indigo','violet','aqua','magenta','coral','gold','tan','skyblue']
@@ -67,7 +68,6 @@ def plot_bbox(image, data):
     return fig
 
 def draw_polygons(image, prediction, fill_mask=False):
-
     draw = ImageDraw.Draw(image)
     scale = 1
     for polygons, label in zip(prediction['polygons'], prediction['labels']):
@@ -86,15 +86,6 @@ def draw_polygons(image, prediction, fill_mask=False):
             draw.text((_polygon[0] + 8, _polygon[1] + 2), label, fill=color)
     return image
 
-def convert_to_od_format(data):
-    bboxes = data.get('bboxes', [])
-    labels = data.get('bboxes_labels', [])
-    od_results = {
-        'bboxes': bboxes,
-        'labels': labels
-    }
-    return od_results
-
 def draw_ocr_bboxes(image, prediction):
     scale = 1
     draw = ImageDraw.Draw(image)
@@ -109,118 +100,98 @@ def draw_ocr_bboxes(image, prediction):
                   fill=color)
     return image
 
-def process_image(image, task_prompt, text_input=None):
-    image = Image.fromarray(image)  # Convert NumPy array to PIL Image
-    if task_prompt == 'Caption':
-        task_prompt = '<CAPTION>'
-        result = run_example(task_prompt, image)
-        return result, None
-    elif task_prompt == 'Detailed Caption':
-        task_prompt = '<DETAILED_CAPTION>'
-        result = run_example(task_prompt, image)
-        return result, None
-    elif task_prompt == 'More Detailed Caption':
-        task_prompt = '<MORE_DETAILED_CAPTION>'
-        result = run_example(task_prompt, image)
-        return result, None
-    elif task_prompt == 'Object Detection':
-        task_prompt = '<OD>'
-        results = run_example(task_prompt, image)
-        fig = plot_bbox(image, results['<OD>'])
-        return results, fig_to_pil(fig)
-    elif task_prompt == 'Dense Region Caption':
-        task_prompt = '<DENSE_REGION_CAPTION>'
-        results = run_example(task_prompt, image)
-        fig = plot_bbox(image, results['<DENSE_REGION_CAPTION>'])
-        return results, fig_to_pil(fig)
-    elif task_prompt == 'Region Proposal':
-        task_prompt = '<REGION_PROPOSAL>'
-        results = run_example(task_prompt, image)
-        fig = plot_bbox(image, results['<REGION_PROPOSAL>'])
-        return results, fig_to_pil(fig)
-    elif task_prompt == 'Caption to Phrase Grounding':
-        task_prompt = '<CAPTION_TO_PHRASE_GROUNDING>'
-        results = run_example(task_prompt, image, text_input)
-        fig = plot_bbox(image, results['<CAPTION_TO_PHRASE_GROUNDING>'])
-        return results, fig_to_pil(fig)
-    elif task_prompt == 'Referring Expression Segmentation':
-        task_prompt = '<REFERRING_EXPRESSION_SEGMENTATION>'
-        results = run_example(task_prompt, image, text_input)
-        output_image = copy.deepcopy(image)
-        output_image = draw_polygons(output_image, results['<REFERRING_EXPRESSION_SEGMENTATION>'], fill_mask=True)
-        return results, output_image
-    elif task_prompt == 'Region to Segmentation':
-        task_prompt = '<REGION_TO_SEGMENTATION>'
-        results = run_example(task_prompt, image, text_input)
-        output_image = copy.deepcopy(image)
-        output_image = draw_polygons(output_image, results['<REGION_TO_SEGMENTATION>'], fill_mask=True)
-        return results, output_image
-    elif task_prompt == 'Open Vocabulary Detection':
-        task_prompt = '<OPEN_VOCABULARY_DETECTION>'
-        results = run_example(task_prompt, image, text_input)
-        bbox_results = convert_to_od_format(results['<OPEN_VOCABULARY_DETECTION>'])
-        fig = plot_bbox(image, bbox_results)
-        return results, fig_to_pil(fig)
-    elif task_prompt == 'Region to Category':
-        task_prompt = '<REGION_TO_CATEGORY>'
-        results = run_example(task_prompt, image, text_input)
-        return results, None
-    elif task_prompt == 'Region to Description':
-        task_prompt = '<REGION_TO_DESCRIPTION>'
-        results = run_example(task_prompt, image, text_input)
-        return results, None
-    elif task_prompt == 'OCR':
-        task_prompt = '<OCR>'
-        result = run_example(task_prompt, image)
-        return result, None
-    elif task_prompt == 'OCR with Region':
-        task_prompt = '<OCR_WITH_REGION>'
-        results = run_example(task_prompt, image)
-        output_image = copy.deepcopy(image)
-        output_image = draw_ocr_bboxes(output_image, results['<OCR_WITH_REGION>'])
-        return results, output_image
-    else:
-        return "", None  # Return empty string and None for unknown task prompts
+def process_video(video_path, task_prompt, text_input=None):
+    video = cv2.VideoCapture(video_path)
+    fps = video.get(cv2.CAP_PROP_FPS)
+    width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-css = """
-  #output {
-    height: 500px; 
-    overflow: auto; 
-    border: 1px solid #ccc; 
-  }
-"""
+    output_frames = []
 
-with gr.Blocks(css=css) as demo:
-    gr.Markdown(DESCRIPTION)
-    with gr.Tab(label="Florence-2 Image Captioning"):
+    while True:
+        ret, frame = video.read()
+        if not ret:
+            break
+
+        image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+
+        if task_prompt == 'Caption':
+            task_prompt = '<CAPTION>'
+            result = run_example(task_prompt, image)
+            output_frames.append(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR))
+        elif task_prompt == 'Detailed Caption':
+            task_prompt = '<DETAILED_CAPTION>'
+            result = run_example(task_prompt, image)
+            output_frames.append(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR))
+        elif task_prompt == 'More Detailed Caption':
+            task_prompt = '<MORE_DETAILED_CAPTION>'
+            result = run_example(task_prompt, image)
+                        output_frames.append(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR))
+        elif task_prompt == 'Object Detection':
+            task_prompt = '<OD>'
+            results = run_example(task_prompt, image)
+            fig = plot_bbox(image, results['<OD>'])
+            output_frames.append(cv2.cvtColor(np.array(fig_to_pil(fig)), cv2.COLOR_RGB2BGR))
+        elif task_prompt == 'Referring Expression Segmentation':
+            task_prompt = '<REF_SEG>'
+            results = run_example(task_prompt, image, text_input)
+            annotated_image = draw_polygons(image.copy(), results['<REF_SEG>'])
+            output_frames.append(cv2.cvtColor(np.array(annotated_image), cv2.COLOR_RGB2BGR))
+        elif task_prompt == 'OCR':
+            task_prompt = '<OCR>'
+            results = run_example(task_prompt, image)
+            annotated_image = draw_ocr_bboxes(image.copy(), results['<OCR>'])
+            output_frames.append(cv2.cvtColor(np.array(annotated_image), cv2.COLOR_RGB2BGR))
+        else:
+            raise ValueError(f"Unsupported task prompt: {task_prompt}")
+
+    video.release()
+
+    output_path = 'output_video.mp4'
+    out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (width, height))
+    for frame in output_frames:
+        out.write(frame)
+    out.release()
+
+    return output_path
+
+task_prompts = ['Caption', 'Detailed Caption', 'More Detailed Caption', 'Object Detection', 'Referring Expression Segmentation', 'OCR']
+
+with gr.Blocks(css="style.css") as demo:
+    with gr.Group():
         with gr.Row():
-            with gr.Column():
-                input_img = gr.Image(label="Input Picture")
-                task_prompt = gr.Dropdown(choices=[
-                    'Caption', 'Detailed Caption', 'More Detailed Caption', 'Object Detection',
-                    'Dense Region Caption', 'Region Proposal', 'Caption to Phrase Grounding',
-                    'Referring Expression Segmentation', 'Region to Segmentation',
-                    'Open Vocabulary Detection', 'Region to Category', 'Region to Description',
-                    'OCR', 'OCR with Region'
-                ], label="Task Prompt", value= 'Caption')
-                text_input = gr.Textbox(label="Text Input (optional)")
-                submit_btn = gr.Button(value="Submit")
-            with gr.Column():
-                output_text = gr.Textbox(label="Output Text")
-                output_img = gr.Image(label="Output Image")
+            video_input = gr.Video(
+                label='Input Video',
+                format='mp4',
+                source='upload',
+                interactive=True
+            )
+        with gr.Row():
+            select_task = gr.Dropdown(
+                label='Task Prompt',
+                choices=task_prompts,
+                value=task_prompts[0],
+                interactive=True
+            )
+            text_input = gr.Textbox(
+                label='Text Input (optional)',
+                visible=False
+            )
+            submit = gr.Button(
+                label='Process Video',
+                scale=1,
+                variant='primary'
+            )
+    video_output = gr.Video(
+        label='Florence-2 Video Demo',
+        format='mp4',
+        interactive=False
+    )
 
-        gr.Examples(
-            examples=[
-                ["image1.jpg", 'Object Detection'],
-                ["image2.jpg", 'OCR with Region']
-            ],
-            inputs=[input_img, task_prompt],
-            outputs=[output_text, output_img],
-            fn=process_image,
-            cache_examples=True,
-            label='Try examples'
-        )
+    submit.click(
+        fn=process_video,
+        inputs=[video_input, select_task, text_input],
+        outputs=video_output,
+    )
 
-        submit_btn.click(process_image, [input_img, task_prompt, text_input], [output_text, output_img])
-
-demo.launch(debug=True)
+demo.queue().launch()
