@@ -135,6 +135,33 @@ def process_image(image, task_prompt, text_input=None, model_id='microsoft/Flore
         task_prompt = '<MORE_DETAILED_CAPTION>'
         results = run_example(task_prompt, image, model_id=model_id)
         return results, None
+    elif task_prompt == 'Caption + Grounding':
+        task_prompt = '<CAPTION>'
+        results = run_example(task_prompt, image, model_id=model_id)
+        text_input = results[task_prompt]
+        task_prompt = '<CAPTION_TO_PHRASE_GROUNDING>'
+        results = run_example(task_prompt, image, text_input, model_id)
+        results['<CAPTION>'] = text_input
+        fig = plot_bbox(image, results['<CAPTION_TO_PHRASE_GROUNDING>'])
+        return results, fig_to_pil(fig)
+    elif task_prompt == 'Detailed Caption + Grounding':
+        task_prompt = '<DETAILED_CAPTION>'
+        results = run_example(task_prompt, image, model_id=model_id)
+        text_input = results[task_prompt]
+        task_prompt = '<CAPTION_TO_PHRASE_GROUNDING>'
+        results = run_example(task_prompt, image, text_input, model_id)
+        results['<DETAILED_CAPTION>'] = text_input
+        fig = plot_bbox(image, results['<CAPTION_TO_PHRASE_GROUNDING>'])
+        return results, fig_to_pil(fig)
+    elif task_prompt == 'More Detailed Caption + Grounding':
+        task_prompt = '<MORE_DETAILED_CAPTION>'
+        results = run_example(task_prompt, image, model_id=model_id)
+        text_input = results[task_prompt]
+        task_prompt = '<CAPTION_TO_PHRASE_GROUNDING>'
+        results = run_example(task_prompt, image, text_input, model_id)
+        results['<MORE_DETAILED_CAPTION>'] = text_input
+        fig = plot_bbox(image, results['<CAPTION_TO_PHRASE_GROUNDING>'])
+        return results, fig_to_pil(fig)
     elif task_prompt == 'Object Detection':
         task_prompt = '<OD>'
         results = run_example(task_prompt, image, model_id=model_id)
@@ -202,6 +229,28 @@ css = """
   }
 """
 
+
+single_task_list =[
+    'Caption', 'Detailed Caption', 'More Detailed Caption', 'Object Detection',
+    'Dense Region Caption', 'Region Proposal', 'Caption to Phrase Grounding',
+    'Referring Expression Segmentation', 'Region to Segmentation',
+    'Open Vocabulary Detection', 'Region to Category', 'Region to Description',
+    'OCR', 'OCR with Region'
+]
+
+cascased_task_list =[
+    'Caption + Grounding', 'Detailed Caption + Grounding', 'More Detailed Caption + Grounding'
+]
+
+
+def update_task_dropdown(choice):
+    if choice == 'Cascased task':
+        return gr.Dropdown(choices=cascased_task_list, value='Caption + Grounding')
+    else:
+        return gr.Dropdown(choices=single_task_list, value='Caption')
+
+
+
 with gr.Blocks(css=css) as demo:
     gr.Markdown(DESCRIPTION)
     with gr.Tab(label="Florence-2 Image Captioning"):
@@ -209,13 +258,9 @@ with gr.Blocks(css=css) as demo:
             with gr.Column():
                 input_img = gr.Image(label="Input Picture")
                 model_selector = gr.Dropdown(choices=list(models.keys()), label="Model", value='microsoft/Florence-2-large')
-                task_prompt = gr.Dropdown(choices=[
-                    'Caption', 'Detailed Caption', 'More Detailed Caption', 'Object Detection',
-                    'Dense Region Caption', 'Region Proposal', 'Caption to Phrase Grounding',
-                    'Referring Expression Segmentation', 'Region to Segmentation',
-                    'Open Vocabulary Detection', 'Region to Category', 'Region to Description',
-                    'OCR', 'OCR with Region'
-                ], label="Task Prompt", value= 'Caption')
+                task_type = gr.Radio(choices=['Single task', 'Cascased task'], label='Task type selector', value='Single task')
+                task_prompt = gr.Dropdown(choices=single_task_list, label="Task Prompt")
+                task_type.change(fn=update_task_dropdown, inputs=task_type, outputs=task_prompt)
                 text_input = gr.Textbox(label="Text Input (optional)")
                 submit_btn = gr.Button(value="Submit")
             with gr.Column():
