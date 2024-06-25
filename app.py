@@ -259,7 +259,7 @@ with gr.Blocks(css=css) as demo:
                 input_img = gr.Image(label="Input Picture")
                 model_selector = gr.Dropdown(choices=list(models.keys()), label="Model", value='microsoft/Florence-2-large')
                 task_type = gr.Radio(choices=['Single task', 'Cascased task'], label='Task type selector', value='Single task')
-                task_prompt = gr.Dropdown(choices=single_task_list, label="Task Prompt")
+                task_prompt = gr.Dropdown(choices=single_task_list, label="Task Prompt", value="Caption")
                 task_type.change(fn=update_task_dropdown, inputs=task_type, outputs=task_prompt)
                 text_input = gr.Textbox(label="Text Input (optional)")
                 submit_btn = gr.Button(value="Submit")
