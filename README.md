@@ -26,3 +26,8 @@ recommends the pinning of transformer but
 seems to be more future proved.
 * added `pydantic==2.10.6` to the requirements to fix the
 `Error: No API Found` message in gradio based on [this suggestion](https://discuss.huggingface.co/t/error-no-api-found/146226/8)
+* added the feature to output confidence score with **Object Detection** with
+the function `run_example_with_score()` following the example provided from
+the [official doc](https://huggingface.co/microsoft/Florence-2-large#output-confidence-score-with-object-detection)
+  * the feature was added to **Open Vocabulary Detection** too but it seems like the
+  `transition_beam_score` are ignored in the call to `processor.post_process_generation()`
