@@ -309,7 +309,7 @@ def process_image(
         return results, output_image
     elif task_prompt == "Open Vocabulary Detection":
         task_prompt = "<OPEN_VOCABULARY_DETECTION>"
-        results = run_example(task_prompt, image, text_input, model_id)
+        results = run_example_with_score(task_prompt, image, text_input, model_id)
         bbox_results = convert_to_od_format(results["<OPEN_VOCABULARY_DETECTION>"])
         fig = plot_bbox(image, bbox_results)
         return results, fig_to_pil(fig)
