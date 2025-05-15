@@ -1,5 +1,4 @@
 spaces
-transformers
+transformers==4.45.0
 timm
 torch==2.4.0
-accelerate
