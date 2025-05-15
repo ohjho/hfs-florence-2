@@ -118,6 +118,7 @@ def run_example(
     return parsed_answer
 
 
+@spaces.GPU
 def run_example_with_score(
     task_prompt, image, text_input=None, model_id="microsoft/Florence-2-large"
 ):
