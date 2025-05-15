@@ -2,3 +2,4 @@ spaces
 transformers
 timm
 torch==2.4.0
+accelerate
