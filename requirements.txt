@@ -1,4 +1,4 @@
 spaces
 transformers
 timm
-einops
+torch==2.4.0
