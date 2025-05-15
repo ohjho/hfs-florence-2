@@ -1,6 +1,6 @@
 ---
 title: Florence 2
-emoji: 📉
+emoji: 🪰
 colorFrom: pink
 colorTo: purple
 sdk: gradio
@@ -30,4 +30,4 @@ seems to be more future proved.
 the function `run_example_with_score()` following the example provided from
 the [official doc](https://huggingface.co/microsoft/Florence-2-large#output-confidence-score-with-object-detection)
   * the feature was added to **Open Vocabulary Detection** too but it seems like the
-  `transition_beam_score` are ignored in the call to `processor.post_process_generation()`
+  `transition_beam_scores` are ignored in the call to `processor.post_process_generation()`
