@@ -58,6 +58,7 @@ def run_example(task_prompt, image, text_input=None, model_id='microsoft/Florenc
         early_stopping=False,
         do_sample=False,
         num_beams=3,
+        output_scores= True
     )
     generated_text = processor.batch_decode(generated_ids, skip_special_tokens=False)[0]
     parsed_answer = processor.post_process_generation(
